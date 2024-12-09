@@ -48,25 +48,21 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
     );
     
 
-     // CCIP相关变量
      IRouterClient private router;
-     address private linkTokenAddress; // LINK代币地址
+     address private linkTokenAddress; 
  
-     // CCIP事件
      event CcipSend(address indexed sender, address indexed receiver, uint256 amount, bytes data, uint64 destinationChainId);
 
     
      constructor(address _router, address _link)
-     ERC20("CIFD Shares", "CIFD") // 为 ERC20 提供名称和符号
-     CCIPReceiver(_router) // 为 CCIPReceiver 提供路由器地址
-     Ownable(msg.sender) // 为 Ownable 设置所有者
+     ERC20("CIFD Shares", "CIFD") 
+     CCIPReceiver(_router) 
+     Ownable(msg.sender) 
      {
-         // 设置CCIP路由器地址和LINK代币地址
          router = IRouterClient(_router);
          linkTokenAddress = _link;
     }
 
-    // 发送跨链消息和代币
     function sendToChain(
         uint64 destinationChainId,
         address receiver,
@@ -160,28 +156,22 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
             any2EvmMessage.destTokenAmounts[0].token,
             any2EvmMessage.destTokenAmounts[0].amount
         );
-        // 业务逻辑：为指定账户转账对应的代币
         address recipient = abi.decode(any2EvmMessage.data, (address));
         _transfer(s_lastReceivedTokenAddress, recipient, s_lastReceivedTokenAmount);
     }
 
-    // 辅助函数，用于转账代币
     function _transfer(
     address tokenAddress,
     address payable recipient,
     uint256 amount
     ) internal {
-    // 检查代币是否为此合约本身（ERC20代币）
     if (tokenAddress == address(this)) {
         _transferERC20(tokenAddress, recipient, amount);
     } else {
-        // 对于非ERC20代币，您需要实现相应的转账逻辑
-        // 例如，如果代币遵循ERC20标准
         IERC20(tokenAddress).transfer(recipient, amount);
     }
     }
 
-    // 转账ERC20代币的辅助函数
     function _transferERC20(
     address tokenAddress,
     address payable recipient,
@@ -201,7 +191,6 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
     _;
     }
 
-    // 添加到白名单的函数
     function allowlistSource(uint64 sourceChainSelector, address sender) public onlyOwner {
     allowlistedSources[sourceChainSelector][sender] = true;
     }
