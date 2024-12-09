@@ -18,8 +18,8 @@ contract Vault {
     }
 
     function deposit() payable public {
+        require(msg.value>0,'must deposit > 0');
         emit Deposit(msg.value, block.timestamp);
-
     }
 
     function withdraw() public {
