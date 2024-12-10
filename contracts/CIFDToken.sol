@@ -45,19 +45,20 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         require(maxSupply > totalSupply(), "Max supply reached.");
 
         uint256 currentTimestamp = block.timestamp;
-        uint256 totalUnlockable = foundersTokens;
+        uint256 totalUnlockable = foundersTokens;//1亿个
 
         if (currentTimestamp >= unlockTime4Years) {
-            totalUnlockable = foundersTokens * 40 / 100;
+            totalUnlockable = foundersTokens * 100 / 100;
         } else if (currentTimestamp >= unlockTime3Years) {
-            totalUnlockable = foundersTokens * 30 / 100;
+            totalUnlockable = foundersTokens * 60 / 100;
         } else if (currentTimestamp >= unlockTime2Years) {
-            totalUnlockable = foundersTokens * 20 / 100;
+            totalUnlockable = foundersTokens * 30 / 100;
         } else if (currentTimestamp >= unlockTime1Year) {
-            totalUnlockable = foundersTokens * 9 / 100;
+            totalUnlockable = foundersTokens * 10 / 100;
         } else {
             return;
         }
+    
         uint256 amountToUnlock = totalUnlockable - unlockedTokens;
         require(amountToUnlock > 0, "No tokens available to unlock.");
 
