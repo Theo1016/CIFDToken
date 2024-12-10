@@ -13,6 +13,7 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
     uint256 public unlockTime4Years;
     uint256 public initFounder;
     uint256 public maxSupply;
+    uint256 public unlockedTokens; 
     event TokensUnlocked(address beneficiary, uint256 amount);
     constructor(address _foundersWallet, address _investorsWallet, address _ecosystemWallet)
         Ownable(msg.sender) 
@@ -35,24 +36,32 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         _mint(foundersWallet, initFounder);
         _mint(investorsWallet, investorsTokens);
         _mint(ecosystemWallet, ecosystemTokens);
+
+        unlockedTokens = initFounder;
     }
-    
+
     function unlockFoundersTokens() public onlyOwner {
         require(block.timestamp >= unlockTime1Year, "Time lock period has not started yet.");
-        require(maxSupply > ERC20.totalSupply(),"Total supply is max.");
+        require(maxSupply > totalSupply(), "Max supply reached.");
+
         uint256 currentTimestamp = block.timestamp;
-        uint256 amountToUnlock;
+        uint256 totalUnlockable = foundersTokens;
+
         if (currentTimestamp >= unlockTime4Years) {
-            amountToUnlock = initFounder * 40;
+            totalUnlockable = foundersTokens * 40 / 100;
         } else if (currentTimestamp >= unlockTime3Years) {
-            amountToUnlock = initFounder * 30;
+            totalUnlockable = foundersTokens * 30 / 100;
         } else if (currentTimestamp >= unlockTime2Years) {
-            amountToUnlock = initFounder * 20;
+            totalUnlockable = foundersTokens * 20 / 100;
         } else if (currentTimestamp >= unlockTime1Year) {
-            amountToUnlock = initFounder * 9;
+            totalUnlockable = foundersTokens * 9 / 100;
         } else {
-            return; 
+            return;
         }
+        uint256 amountToUnlock = totalUnlockable - unlockedTokens;
+        require(amountToUnlock > 0, "No tokens available to unlock.");
+
+        unlockedTokens += amountToUnlock;
         _mint(foundersWallet, amountToUnlock);
         emit TokensUnlocked(foundersWallet, amountToUnlock);
     }
