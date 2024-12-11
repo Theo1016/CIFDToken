@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./CIFDTokenToAnotherChain.sol"; 
 contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
     address public foundersWallet;
     address public investorsWallet;
@@ -15,6 +16,9 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
     uint256 public maxSupply;
     uint256 public unlockedTokens; 
     event TokensUnlocked(address beneficiary, uint256 amount);
+    address public crossChainAdmin;
+    uint64 CROSS_CHAIN_ID;
+
     constructor(address _foundersWallet, address _investorsWallet, address _ecosystemWallet)
         Ownable(msg.sender) 
     {
@@ -38,14 +42,28 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         _mint(ecosystemWallet, ecosystemTokens);
 
         unlockedTokens = initFounder;
+        crossChainAdmin = msg.sender;
+    }
+
+    function setCrossChainAdmin(address _newAdmin) public onlyOwner {
+        crossChainAdmin = _newAdmin;
+    }
+
+    function requestCrossChainTransfer(address _to, uint256 _amount) public {
+        require(IERC20(_to).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
+        CIFDTokenToAnotherChain(crossChainAdmin).sendToChain(
+            CROSS_CHAIN_ID,
+            msg.sender,
+            _amount, 
+            "" 
+        );
     }
 
     function unlockFoundersTokens() public onlyOwner {
         require(block.timestamp >= unlockTime1Year, "Time lock period has not started yet.");
         require(maxSupply > totalSupply(), "Max supply reached.");
-
         uint256 currentTimestamp = block.timestamp;
-        uint256 totalUnlockable = foundersTokens;//1亿个
+        uint256 totalUnlockable = foundersTokens;
 
         if (currentTimestamp >= unlockTime4Years) {
             totalUnlockable = foundersTokens * 100 / 100;
