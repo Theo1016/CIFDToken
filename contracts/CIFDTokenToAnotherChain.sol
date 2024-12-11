@@ -14,12 +14,14 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
     address private s_lastReceivedTokenAddress; // Store the last received token address.
     uint256 private s_lastReceivedTokenAmount; // Store the last received amount.
     string private s_lastReceivedText; // Store the last received text.
+   
 
     EnumerableMap.Bytes32ToUintMap internal s_failedMessages;
     error ErrorCase(); // Used when simulating a revert during message processing.
     IERC20 private s_linkToken;
     bool internal s_simRevert = false;
 
+    address private _ccipAdmin;
     // The message contents of failed messages are stored here.
     mapping(bytes32 messageId => Client.Any2EVMMessage contents)
         public s_messageContents;
@@ -63,7 +65,16 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
          linkTokenAddress = _link;
     }
     function getCCIPAdmin() public view returns (address) {
-        return owner(); 
+        return _ccipAdmin;
+    }
+
+    function setCCIPAdmin(address admin) public onlyOwner{
+        _ccipAdmin = admin;
+    }
+
+    modifier onlyCCIPAdmin() {
+        require(_ccipAdmin==msg.sender, "Not a CCIP admin");
+        _;
     }
 
     function sendToChain(
@@ -71,7 +82,7 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
         address receiver,
         uint256 amount,
         bytes memory data
-    ) public onlyOwner {
+    ) public onlyCCIPAdmin  {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(receiver),
             data: data,
@@ -194,7 +205,7 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
     _;
     }
 
-    function allowlistSource(uint64 sourceChainSelector, address sender) public onlyOwner {
+    function allowlistSource(uint64 sourceChainSelector, address sender) public onlyCCIPAdmin  {
     allowlistedSources[sourceChainSelector][sender] = true;
     }
 
