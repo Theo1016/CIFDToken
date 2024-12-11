@@ -62,6 +62,9 @@ contract CIFDTokenToAnotherChain is ERC20,CCIPReceiver,Ownable{
          router = IRouterClient(_router);
          linkTokenAddress = _link;
     }
+    function getCCIPAdmin() public view returns (address) {
+        return owner(); 
+    }
 
     function sendToChain(
         uint64 destinationChainId,
