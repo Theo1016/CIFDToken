@@ -49,6 +49,10 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         crossChainAdmin = _newAdmin;
     }
 
+    function getCCIPAdmin() public view returns (address) {
+        return crossChainAdmin;
+    }
+
     function requestCrossChainTransfer(address _to, uint256 _amount) public {
         require(IERC20(_to).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
         CIFDTokenToAnotherChain(crossChainAdmin).sendToChain(
