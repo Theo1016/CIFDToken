@@ -17,7 +17,6 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
     uint256 public unlockedTokens; 
     event TokensUnlocked(address beneficiary, uint256 amount);
     address public crossChainAdmin;
-    uint64 CROSS_CHAIN_ID;
 
     constructor(address _foundersWallet, address _investorsWallet, address _ecosystemWallet)
         Ownable(msg.sender) 
