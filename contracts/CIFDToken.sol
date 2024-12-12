@@ -53,16 +53,6 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         return crossChainAdmin;
     }
 
-    function requestCrossChainTransfer(address _to, uint256 _amount) public {
-        require(IERC20(_to).transferFrom(msg.sender, address(this), _amount), "Transfer failed");
-        CIFDTokenToAnotherChain(crossChainAdmin).sendToChain(
-            CROSS_CHAIN_ID,
-            msg.sender,
-            _amount, 
-            "" 
-        );
-    }
-
     function unlockFoundersTokens() public onlyOwner {
         require(block.timestamp >= unlockTime1Year, "Time lock period has not started yet.");
         require(maxSupply > totalSupply(), "Max supply reached.");
