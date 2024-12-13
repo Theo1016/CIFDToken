@@ -2,12 +2,13 @@ const { bytecode } = require("../artifacts/contracts/CIFDToken.sol/CIFDToken.jso
 const { encoder, create2Address } = require("../utils/utils.js")
 
 const main = async () => {
-    const factoryAddr = "0x3379b6E9d4BD39B0f4C8c9C2277a6BcA6c13E728";
-    const foundersWallet = "";
-    const investorsWallet = "";
-    const ecosystemWallet = "";
+    const factoryAddr = process.env.FACTORY_ADDR;
+    const foundersWallet = process.env.FOUNDERS_WALLET;
+    const investorsWallet = process.env.INVESTORS_WALLET;
+    const ecosystemWallet = process.env.ECOSYSTEM_WALLET;
+    const owner = process.env.OWNER;
     const saltHex = ethers.utils.id("CIFDAQ");
-    const initCode = bytecode + encoder(["address"], [foundersWallet])+encoder(["address"], [investorsWallet])+ encoder(["address"], [ecosystemWallet]);
+    const initCode = bytecode + encoder(["address"], [foundersWallet])+encoder(["address"], [investorsWallet])+ encoder(["address"], [ecosystemWallet])+ encoder(["address"], [owner]);
 
     const create2Addr = create2Address(factoryAddr, saltHex, initCode);
     console.log("precomputed address:", create2Addr);
@@ -17,7 +18,13 @@ const main = async () => {
 
     const lockDeploy = await factory.deploy(initCode, saltHex);
     const txReceipt = await lockDeploy.wait();
-    console.log("Deployed to:", txReceipt.events[0].args[0]);
+    const deployedEvent = txReceipt.events?.find(event => event.event === 'Deploy');
+
+    if (deployedEvent) {
+        console.log("Deployed contract address:", deployedEvent.args.addr);
+    } else {
+        console.error("Deployed event not found in transaction receipt");
+    }
 };
 
 main()
