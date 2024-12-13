@@ -18,8 +18,8 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
     event TokensUnlocked(address beneficiary, uint256 amount);
     address public crossChainAdmin;
 
-    constructor(address _foundersWallet, address _investorsWallet, address _ecosystemWallet)
-        Ownable(msg.sender) 
+    constructor(address _foundersWallet, address _investorsWallet, address _ecosystemWallet, address _owner)
+        Ownable(_owner) 
     {
         require(_foundersWallet != address(0), "Founder's wallet cannot be the zero address.");
         require(_investorsWallet != address(0), "Investor's wallet cannot be the zero address.");
@@ -41,7 +41,7 @@ contract CIFDToken is ERC20("CIFD Shares", "CIFD"), Ownable {
         _mint(ecosystemWallet, ecosystemTokens);
 
         unlockedTokens = initFounder;
-        crossChainAdmin = msg.sender;
+        crossChainAdmin = _owner;
     }
 
     function setCrossChainAdmin(address _newAdmin) public onlyOwner {
